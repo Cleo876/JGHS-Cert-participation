@@ -206,7 +206,7 @@
                         <h3 class="text-blue-900 font-bold uppercase tracking-widest text-sm mb-1">Visual Art Department</h3>
                         <h1 class="font-serif-accent text-5xl font-bold text-yellow-600 mb-2 tracking-tight">Certificate of Participation</h1>
                         <div class="h-1 w-24 bg-blue-900 mx-auto my-3"></div>
-                        <h2 class="text-gray-600 font-semibold uppercase tracking-wide text-lg">Grade 10 Graphics Art Examination 2025-2026</h2>
+                        <h2 class="text-gray-600 font-semibold uppercase tracking-wide text-lg">Grade 10 Graphics Art Examination <span id="displayHeaderYear">2025-2026</span></h2>
                     </div>
 
                     <!-- 2. Presented To -->
@@ -314,6 +314,7 @@
             nameEl.textContent = name.trim() === "" ? "[Student Name]" : name;
             
             document.getElementById('displayYear').textContent = year;
+            document.getElementById('displayHeaderYear').textContent = year; // Update header year dynamically
 
             if (dateVal) {
                 const dateObj = new Date(dateVal);
