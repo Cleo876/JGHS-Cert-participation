@@ -102,7 +102,7 @@
         .signature-line {
             border-top: 1px solid #333;
             width: 100%;
-            margin-top: 40px;
+            margin-top: 20px;
             padding-top: 5px;
             font-size: 10px;
             font-weight: 700;
@@ -111,22 +111,21 @@
             color: var(--jg-blue);
         }
 
-        /* Seal Style */
-        .seal {
-            width: 90px;
-            height: 90px;
+        /* Seal Style - UPDATED for Placeholder use */
+        .seal-placeholder {
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            border: 3px double var(--jg-gold);
+            border: 2px dashed #d1d5db; /* Light gray dashed border */
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--jg-gold);
-            font-weight: bold;
-            font-size: 10px;
+            color: #9ca3af; /* Light gray text */
+            font-weight: 600;
+            font-size: 9px;
             text-align: center;
             text-transform: uppercase;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
-            background: var(--jg-blue);
+            background: rgba(255, 255, 255, 0.8); /* Mostly transparent/white */
         }
 
     </style>
@@ -194,17 +193,16 @@
                 <div class="corner-accent bl"></div>
 
                 <!-- SCHOOL LOGO -->
-                <!-- FIXED: Using direct raw.githubusercontent.com link to prevent redirects/CORS issues -->
                 <img src="https://raw.githubusercontent.com/Cleo876/JGHS-Cert-participation/main/JGHS%20Logo.png" 
                      alt="JGHS Logo" 
                      crossorigin="anonymous"
                      class="absolute top-12 left-16 w-28 h-28 z-20 drop-shadow-lg object-contain">
                 
-                <!-- Content Container -->
-                <div class="relative z-10 w-full h-full flex flex-col items-center text-center px-16 py-12">
+                <!-- Content Container - Reduced vertical padding to fit lifted footer -->
+                <div class="relative z-10 w-full h-full flex flex-col items-center text-center px-16 py-6">
                     
                     <!-- 1. Header Section -->
-                    <div class="mt-4 mb-2">
+                    <div class="mt-4 mb-1">
                         <h3 class="text-blue-900 font-bold uppercase tracking-widest text-sm mb-1">Visual Art Department</h3>
                         <h1 class="font-serif-accent text-5xl font-bold text-yellow-600 mb-2 tracking-tight">Certificate of Participation</h1>
                         <div class="h-1 w-24 bg-blue-900 mx-auto my-3"></div>
@@ -212,19 +210,19 @@
                     </div>
 
                     <!-- 2. Presented To -->
-                    <div class="mt-8 mb-2">
+                    <div class="mt-4 mb-2">
                         <p class="font-serif-accent italic text-gray-500 text-lg">This Certificate is Proudly Presented To</p>
                     </div>
 
                     <!-- 3. Name Input Area -->
-                    <div class="mb-6 w-3/4">
+                    <div class="mb-3 w-3/4">
                         <span id="displayStudentName" class="font-serif-accent text-6xl text-blue-900 block border-b-2 border-gray-300 pb-2 px-4 whitespace-nowrap overflow-hidden text-ellipsis">
                             [Student Name]
                         </span>
                     </div>
 
                     <!-- 4. Body Text -->
-                    <div class="max-w-3xl mb-8">
+                    <div class="max-w-3xl mb-4">
                         <p class="text-gray-700 leading-relaxed text-lg">
                             In recognition of the successful completion and commendable performance in the Grade 10 Graphics Art Examination.
                         </p>
@@ -234,7 +232,7 @@
                     </div>
 
                     <!-- 5. Technical Details Grid -->
-                    <div class="flex justify-center gap-12 text-sm text-left mb-10 border-t border-b border-gray-200 py-3 w-3/4">
+                    <div class="flex justify-center gap-12 text-sm text-left mb-6 border-t border-b border-gray-200 py-3 w-3/4">
                         <div>
                             <span class="font-bold text-blue-900 block">Subject:</span>
                             <span class="text-gray-700">Graphics Art</span>
@@ -253,39 +251,39 @@
                         </div>
                     </div>
 
-                    <!-- 6. Footer / Signatures -->
-                    <div class="mt-auto w-full flex items-end justify-between gap-4 px-4">
+                    <!-- 6. Footer / Signatures - Lifted significantly (pb-24) -->
+                    <div class="mt-auto w-full flex items-end justify-between gap-2 px-2 pb-24">
                         
                         <!-- Signature 1 -->
-                        <div class="flex-1 flex flex-col justify-end">
-                            <div class="font-script text-2xl text-gray-400 h-8"></div> <!-- Spacer for sig -->
+                        <div class="flex-1 flex flex-col justify-end px-2">
+                            <div class="h-8"></div> <!-- Spacer -->
                             <div class="signature-line">Teacher</div>
                         </div>
 
                         <!-- Signature 2 -->
-                        <div class="flex-1 flex flex-col justify-end">
-                            <div class="font-script text-2xl text-gray-400 h-8"></div>
+                        <div class="flex-1 flex flex-col justify-end px-2">
+                            <div class="h-8"></div>
                             <div class="signature-line">Head of Dept.</div>
                         </div>
 
-                        <!-- Seal -->
+                        <!-- Seal Placeholder -->
                         <div class="flex-none mx-2 mb-2">
-                            <div class="seal">
+                            <div class="seal-placeholder">
                                 <div>
-                                    OFFICIAL<br>SEAL<br>2026
+                                    Place<br>Seal<br>Here
                                 </div>
                             </div>
                         </div>
 
                         <!-- Signature 3 -->
-                        <div class="flex-1 flex flex-col justify-end">
-                            <div class="font-script text-2xl text-gray-400 h-8"></div>
+                        <div class="flex-1 flex flex-col justify-end px-2">
+                            <div class="h-8"></div>
                             <div class="signature-line">Vice Principal</div>
                         </div>
 
                         <!-- Signature 4 -->
-                        <div class="flex-1 flex flex-col justify-end">
-                            <div class="font-script text-2xl text-gray-400 h-8"></div>
+                        <div class="flex-1 flex flex-col justify-end px-2">
+                            <div class="h-8"></div>
                             <div class="signature-line">Principal</div>
                         </div>
 
