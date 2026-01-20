@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Arts Certificate Maker</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <!-- html2pdf.js for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* Custom Colors based on Jonathan Grant HS Theme */
+        :root {
+            --jg-blue: #003399; /* Deep Royal Blue */
+            --jg-gold: #D4AF37; /* Metallic Gold */
+            --jg-white: #FFFFFF;
+            --jg-ivory: #FFFCF7;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        /* responsive-container: Holds the scaled certificate.
+           We use JS to set the height of this container based on the scaled height of the certificate
+           to prevent extra whitespace.
+        */
+        #preview-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            overflow: hidden; /* Hide overflow from the scaling */
+            position: relative;
+            transform-origin: top center;
+        }
+
+        /* Certificate Container - Fixed Aspect Ratio for A4 Landscape (1123x794px) */
+        #certificate-preview {
+            width: 1123px; 
+            height: 794px; 
+            background-color: var(--jg-white);
+            position: relative; /* Relative for scaling context */
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.2);
+            flex-shrink: 0; /* Prevent flex shrinking */
+            transform-origin: top center; /* Scale from top */
+        }
+
+        /* TEXTURE & DESIGN LAYERS */
+        .texture-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0; 
+            opacity: 0.05;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .border-frame {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            border: 4px solid var(--jg-blue);
+            z-index: 5;
+        }
+        
+        .border-frame::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            right: 4px;
+            bottom: 4px;
+            border: 2px solid var(--jg-gold);
+        }
+
+        /* Corner Accents */
+        .corner-accent {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: var(--jg-blue);
+            z-index: 6;
+            clip-path: polygon(0 0, 100% 0, 0 100%);
+        }
+        .tr { top: 15px; right: 15px; transform: rotate(90deg); }
+        .bl { bottom: 15px; left: 15px; transform: rotate(-90deg); }
+
+        /* Typography */
+        .font-serif-accent {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .signature-line {
+            border-top: 1px solid #333;
+            width: 100%;
+            margin-top: 40px;
+            padding-top: 5px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--jg-blue);
+        }
+
+        /* Seal Style */
+        .seal {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 3px double var(--jg-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--jg-gold);
+            font-weight: bold;
+            font-size: 10px;
+            text-align: center;
+            text-transform: uppercase;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+            background: var(--jg-blue);
+        }
+
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-blue-900 text-white p-4 shadow-md z-50 relative">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold text-yellow-500">Certificate Generator</h1>
+            <span class="text-xs opacity-75 md:text-sm">Grade 10 Graphics Art</span>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="flex-grow p-4 md:p-8 flex flex-col items-center gap-8 w-full bg-gray-100">
+
+        <!-- Controls -->
+        <div class="w-full max-w-4xl bg-white p-6 rounded-lg shadow-lg border-t-4 border-yellow-500 z-50">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                Student Details
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Student Name</label>
+                    <input type="text" id="studentNameInput" placeholder="Ex: Cleon Williams" 
+                           class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-gray-50"
+                           oninput="updateCertificate()">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Academic Year</label>
+                    <input type="text" id="yearInput" value="2025-2026" 
+                           class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-gray-50"
+                           oninput="updateCertificate()">
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Date Awarded</label>
+                    <input type="date" id="dateInput" 
+                           class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-gray-50"
+                           onchange="updateCertificate()">
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button onclick="downloadPDF()" id="downloadBtn" class="bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 px-8 rounded shadow-lg flex items-center gap-2 transition transform hover:-translate-y-0.5 active:translate-y-0">
+                    Download Certificate PDF
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Preview Wrapper (Handles Scaling) -->
+        <div id="preview-wrapper">
+            <div id="certificate-preview">
+                
+                <!-- Background & Frame -->
+                <div class="texture-overlay"></div>
+                <div class="border-frame"></div>
+                <div class="corner-accent tr"></div>
+                <div class="corner-accent bl"></div>
+
+                <!-- SCHOOL LOGO -->
+                <!-- FIXED: Using direct raw.githubusercontent.com link to prevent redirects/CORS issues -->
+                <img src="https://raw.githubusercontent.com/Cleo876/JGHS-Cert-participation/main/JGHS%20Logo.png" 
+                     alt="JGHS Logo" 
+                     crossorigin="anonymous"
+                     class="absolute top-12 left-16 w-28 h-28 z-20 drop-shadow-lg object-contain">
+                
+                <!-- Content Container -->
+                <div class="relative z-10 w-full h-full flex flex-col items-center text-center px-16 py-12">
+                    
+                    <!-- 1. Header Section -->
+                    <div class="mt-4 mb-2">
+                        <h3 class="text-blue-900 font-bold uppercase tracking-widest text-sm mb-1">Visual Art Department</h3>
+                        <h1 class="font-serif-accent text-5xl font-bold text-yellow-600 mb-2 tracking-tight">Certificate of Participation</h1>
+                        <div class="h-1 w-24 bg-blue-900 mx-auto my-3"></div>
+                        <h2 class="text-gray-600 font-semibold uppercase tracking-wide text-lg">Grade 10 Graphics Art Examination 2025-2026</h2>
+                    </div>
+
+                    <!-- 2. Presented To -->
+                    <div class="mt-8 mb-2">
+                        <p class="font-serif-accent italic text-gray-500 text-lg">This Certificate is Proudly Presented To</p>
+                    </div>
+
+                    <!-- 3. Name Input Area -->
+                    <div class="mb-6 w-3/4">
+                        <span id="displayStudentName" class="font-serif-accent text-6xl text-blue-900 block border-b-2 border-gray-300 pb-2 px-4 whitespace-nowrap overflow-hidden text-ellipsis">
+                            [Student Name]
+                        </span>
+                    </div>
+
+                    <!-- 4. Body Text -->
+                    <div class="max-w-3xl mb-8">
+                        <p class="text-gray-700 leading-relaxed text-lg">
+                            In recognition of the successful completion and commendable performance in the Grade 10 Graphics Art Examination.
+                        </p>
+                        <p class="text-gray-600 leading-relaxed mt-2 text-sm italic px-10">
+                            This certificate acknowledges the student’s creativity, technical skills, visual communication, and dedication demonstrated throughout the examination process.
+                        </p>
+                    </div>
+
+                    <!-- 5. Technical Details Grid -->
+                    <div class="flex justify-center gap-12 text-sm text-left mb-10 border-t border-b border-gray-200 py-3 w-3/4">
+                        <div>
+                            <span class="font-bold text-blue-900 block">Subject:</span>
+                            <span class="text-gray-700">Graphics Art</span>
+                        </div>
+                        <div>
+                            <span class="font-bold text-blue-900 block">Level:</span>
+                            <span class="text-gray-700">Grade 10</span>
+                        </div>
+                        <div>
+                            <span class="font-bold text-blue-900 block">Academic Year:</span>
+                            <span id="displayYear" class="text-gray-700">2025-2026</span>
+                        </div>
+                        <div>
+                            <span class="font-bold text-blue-900 block">Awarded On:</span>
+                            <span id="displayDate" class="text-gray-700">Jan 19, 2026</span>
+                        </div>
+                    </div>
+
+                    <!-- 6. Footer / Signatures -->
+                    <div class="mt-auto w-full flex items-end justify-between gap-4 px-4">
+                        
+                        <!-- Signature 1 -->
+                        <div class="flex-1 flex flex-col justify-end">
+                            <div class="font-script text-2xl text-gray-400 h-8"></div> <!-- Spacer for sig -->
+                            <div class="signature-line">Teacher</div>
+                        </div>
+
+                        <!-- Signature 2 -->
+                        <div class="flex-1 flex flex-col justify-end">
+                            <div class="font-script text-2xl text-gray-400 h-8"></div>
+                            <div class="signature-line">Head of Dept.</div>
+                        </div>
+
+                        <!-- Seal -->
+                        <div class="flex-none mx-2 mb-2">
+                            <div class="seal">
+                                <div>
+                                    OFFICIAL<br>SEAL<br>2026
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Signature 3 -->
+                        <div class="flex-1 flex flex-col justify-end">
+                            <div class="font-script text-2xl text-gray-400 h-8"></div>
+                            <div class="signature-line">Vice Principal</div>
+                        </div>
+
+                        <!-- Signature 4 -->
+                        <div class="flex-1 flex flex-col justify-end">
+                            <div class="font-script text-2xl text-gray-400 h-8"></div>
+                            <div class="signature-line">Principal</div>
+                        </div>
+
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- 1. Date & Initialization Logic ---
+        const today = new Date("2026-01-19"); 
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        
+        document.getElementById('dateInput').valueAsDate = today;
+        document.getElementById('displayDate').textContent = today.toLocaleDateString('en-US', options);
+
+        function updateCertificate() {
+            // Get values
+            const name = document.getElementById('studentNameInput').value;
+            const year = document.getElementById('yearInput').value;
+            const dateVal = document.getElementById('dateInput').value;
+
+            // Update DOM
+            const nameEl = document.getElementById('displayStudentName');
+            nameEl.textContent = name.trim() === "" ? "[Student Name]" : name;
+            
+            document.getElementById('displayYear').textContent = year;
+
+            if (dateVal) {
+                const dateObj = new Date(dateVal);
+                const userTimezoneOffset = dateObj.getTimezoneOffset() * 60000;
+                const adjustedDate = new Date(dateObj.getTime() + userTimezoneOffset);
+                document.getElementById('displayDate').textContent = adjustedDate.toLocaleDateString('en-US', options);
+            }
+        }
+
+        // --- 2. Dynamic Mobile Scaling Logic ---
+        function resizePreview() {
+            const wrapper = document.getElementById('preview-wrapper');
+            const certificate = document.getElementById('certificate-preview');
+            const mainContainerWidth = wrapper.parentElement.offsetWidth; // Width of the <main> or window
+            
+            // Standard A4 width in pixels (defined in CSS)
+            const baseWidth = 1123; 
+            const baseHeight = 794;
+
+            // Calculate scale
+            // We take the available width (minus some padding) and divide by base width
+            let scale = (mainContainerWidth - 32) / baseWidth; 
+            
+            // Cap scale at 1 (don't make it huge on desktop)
+            if (scale > 1) scale = 1;
+
+            // Apply scale
+            certificate.style.transform = `scale(${scale})`;
+            
+            // IMPORTANT: Adjust wrapper height because scale() doesn't affect flow layout height
+            // We need to shrink the wrapper so there isn't huge whitespace below
+            wrapper.style.height = `${baseHeight * scale}px`;
+        }
+
+        // Listen for window resize
+        window.addEventListener('resize', resizePreview);
+        // Initial call
+        resizePreview();
+
+
+        // --- 3. PDF Download Logic ---
+        function downloadPDF() {
+            const element = document.getElementById('certificate-preview');
+            const btn = document.getElementById('downloadBtn');
+            const originalText = btn.innerHTML;
+            const name = document.getElementById('studentNameInput').value || "Student";
+
+            btn.innerHTML = 'Generating PDF...';
+            btn.disabled = true;
+
+            // We must temporarily remove the scale transform for html2pdf to see the full resolution
+            // or configure html2pdf to handle it. 
+            // Simplest way: Clone the node, append to body hidden, reset transform, print, remove.
+            // However, html2pdf usually handles "element" passed to it. 
+            // The issue is if the element is currently scaled down via CSS, the PDF might be low res.
+            // Let's reset transform momentarily.
+            
+            const currentTransform = element.style.transform;
+            element.style.transform = 'scale(1)';
+            
+            const opt = {
+                margin:       0,
+                filename:     `VisualArts_Certificate_${name.replace(/\s+/g, '_')}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Restore the responsive scaling
+                element.style.transform = currentTransform;
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>
